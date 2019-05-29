@@ -499,3 +499,368 @@ select round(avg(age), 1) from students where is_delete=0 and gender=2;
 
 ## 6.4. 分组
 - 详细案例参考html文件15.5
+
+- 分组：group by
+    group by的含义:将查询结果按照1个或多个字段进行分组，字段值相同的为一组
+    group by可用于单个字段分组，也可用于多个字段分组
+    group by单独使用时，只显示出每组的第一条记录, 所以group by单独使用时的实际意义不大
+    
+- group by + group_concat()
+    group_concat(字段名)可以作为一个输出字段来使用，括号里面的内容组合为一个字段
+    表示分组之后，根据分组结果，使用group_concat()来放置每一组的某字段的值的集合
+    性别进行分组，显示每个分组下所有的姓名：
+    mysql> select gender, group_concat(name) from students group by gender;
+    +--------+------------------------------------------+
+    | gender | group_concat(name)                       |
+    +--------+------------------------------------------+
+    | 男     | 彭于晏,刘德华,周杰伦,程坤,郭靖           |
+    | 女     | 小明,小月月,黄蓉,王祖贤,刘亦菲,静香,周杰 |
+    | 中性   | 金星                                     |
+    | 保密   | 凤姐                                     |
+    +--------+------------------------------------------+
+    4 rows in set (0.00 sec)
+    
+- group by + 集合函数
+    通过group_concat()的启发，我们既然可以统计出每个分组的某字段的值的集合，
+    那么我们也可以通过集合函数来对这个值的集合做一些操作
+    里面也可以传入字符串
+    
+    - 统计每个性别所有的年龄：
+    mysql> select gender, group_concat(age) from students group by gender;
+    +--------+----------------------+
+    | gender | group_concat(age)    |
+    +--------+----------------------+
+    | 男     | 29,59,36,27,12       |
+    | 女     | 18,18,38,18,25,12,34 |
+    | 中性   | 33                   |
+    | 保密   | 28                   |
+    +--------+----------------------+
+    4 rows in set (0.00 sec)
+    
+    传入字符串下划线_和空格
+    mysql> select gender, group_concat(name, "_", age, " ", id) from students where gender=1 group by gender;
+    +--------+----------------------------------------------------------+
+    | gender | group_concat(name, "_", age, " ", id)                    |
+    +--------+----------------------------------------------------------+
+    | 男     | 彭于晏_29 3,刘德华_59 4,周杰伦_36 8,程坤_27 9,郭靖_12 13 |
+    +--------+----------------------------------------------------------+
+    1 row in set (0.00 sec)
+        
+    - 统计每个分组的平均年龄：
+    mysql> select gender, avg(age) from students group by gender;
+    +--------+----------+
+    | gender | avg(age) |
+    +--------+----------+
+    | 女     |  23.2857 |
+    | 男     |  32.6000 |
+    | 保密   |  28.0000 |
+    | 中性   |  33.0000 |
+    +--------+----------+
+    4 rows in set (0.00 sec)
+    
+    - 分别统计性别为男/女的人的个数
+    select gender, count(*) from students group by gender;
+
+- group by + having
+    having 条件表达式：用来分组查询后指定一些条件来输出查询结果
+    having作用和where一样，但having只能用于group by
+    统计出性别里面人数大于2人的分组：
+    select gender,count(*) from students group by gender having count(*)>2;
+    +--------+----------+
+    | gender | count(*) |
+    +--------+----------+
+    | 女     |        7 |
+    | 男     |        5 |
+    +--------+----------+
+    2 rows in set (0.00 sec)
+    
+    select后面的都是要显示的列内容，性别进行分组，显示里面人数大于2的分组，并显示每个分组里面的名称和平均年龄
+    mysql> select gender, group_concat(name), avg(age) from students group by gender having count(*)>2;
+    +--------+------------------------------------------+----------+
+    | gender | group_concat(name)                       | avg(age) |
+    +--------+------------------------------------------+----------+
+    | 男     | 彭于晏,刘德华,周杰伦,程坤,郭靖           |  32.6000 |
+    | 女     | 小明,小月月,黄蓉,王祖贤,刘亦菲,静香,周杰 |  23.2857 |
+    +--------+------------------------------------------+----------+
+        
+- group by + with rollup
+    with rollup的作用是：在最后新增一行，来记录当前列里所有记录的总和
+    select gender,count(*) from students group by gender with rollup;
+    +--------+----------+
+    | gender | count(*) |
+    +--------+----------+
+    | 男     |        5 |
+    | 女     |        7 |
+    | 中性   |        1 |
+    | 保密   |        1 |
+    | NULL   |       14 |
+    +--------+----------+
+    
+## 6.5. 分页
+- 详细案例参考html文件15.6
+- limit必须放在最后
+
+- 获取部分行
+    当数据量过大时，在一页中查看数据是一件非常麻烦的事情
+    语法：select * from 表名 limit count
+    说明：查询到的数据，只显示前面count条数据
+    语法: select * from 表名 limit start,count
+    说明: 显示从start开始，获取的count条数据
+    
+    mysql> select * from students limit 0,3;
+    +----+--------+------+--------+--------+--------+-----------+
+    | id | name   | age  | height | gender | cls_id | is_delete |
+    +----+--------+------+--------+--------+--------+-----------+
+    |  1 | 小明   |   18 | 180.00 | 女     |      1 |           |
+    |  2 | 小月月 |   18 | 180.00 | 女     |      2 |          |
+    |  3 | 彭于晏 |   29 | 185.00 | 男     |      1 |           |
+    +----+--------+------+--------+--------+--------+-----------+
+
+- 分页
+    已知：每页显示m条数据，当前显示第n页
+    求总页数：此段逻辑后面会在python中实现
+        查询总条数p1
+        使用p1除以m得到p2
+        如果整除则p2为总数页
+        如果不整除则p2+1为总页数
+    求第n页的数据：n代表第几页，m代表每页显示的数据
+    select * from students where is_delete=0 limit (n-1)*m,m
+    - SQL查询时候要计算出：(n-1)*m,m的具体数字值
+    
+- 顺序：where --- order by --- limit
+
+
+## 6.6. 连接查询
+- 详细案例参考html文件15.7
+当查询结果的列来源于多张表时，需要将多张表连接成一个大的数据集，再选择合适的列返回
+mysql支持三种类型的连接查询，分别为：
+
+- 内连接查询：查询的结果为两个表匹配到的数据,取交集
+- 右连接查询：查询的结果为两个表匹配到的数据，右表特有的数据，对于左表中不存在的数据使用null填充，右边要全显示
+- 左连接查询：查询的结果为两个表匹配到的数据，左表特有的数据，对于右表中不存在的数据使用null填充，左边要全显示
+
+- 语法
+    select * from 表1 inner或left或right join 表2 on 表1.列 = 表2.列
+    
+- 例1：使用内连接查询班级表与学生表
+    select * from students inner join classes on students.cls_id = classes.id;
+    mysql> select * from students inner join classes on students.cls_id=classes.id;
+    +----+--------+------+--------+--------+--------+-----------+----+-------------+
+    | id | name   | age  | height | gender | cls_id | is_delete | id | name        |
+    +----+--------+------+--------+--------+--------+-----------+----+-------------+
+    |  1 | 小明   |   18 | 180.00 | 女     |      1 |           |  1 | python_01期 |
+    |  2 | 小月月 |   18 | 180.00 | 女     |      2 |          |  2 | python_02期 |
+    |  3 | 彭于晏 |   29 | 185.00 | 男     |      1 |           |  1 | python_01期 |
+    |  4 | 刘德华 |   59 | 175.00 | 男     |      2 |          |  2 | python_02期 |
+    |  5 | 黄蓉   |   38 | 160.00 | 女     |      1 |           |  1 | python_01期 |
+    |  6 | 凤姐   |   28 | 150.00 | 保密   |      2 |          |  2 | python_02期 |
+    |  7 | 王祖贤 |   18 | 172.00 | 女     |      1 |          |  1 | python_01期 |
+    |  8 | 周杰伦 |   36 |   NULL | 男     |      1 |           |  1 | python_01期 |
+    |  9 | 程坤   |   27 | 181.00 | 男     |      2 |           |  2 | python_02期 |
+    | 10 | 刘亦菲 |   25 | 166.00 | 女     |      2 |           |  2 | python_02期 |
+    | 11 | 金星   |   33 | 162.00 | 中性   |      3 |          |  3 | python_03期 |
+    | 12 | 静香   |   12 | 180.00 | 女     |      4 |           |  4 | python_04期 |
+    | 13 | 郭靖   |   12 | 170.00 | 男     |      4 |           |  4 | python_04期 |
+    +----+--------+------+--------+--------+--------+-----------+----+-------------+
+
+    上面取出了所有的students.cls_id=classes.id相同的列然后，进行连接
+    我们也可以只取出学生的名称和班级名称
+    mysql> select students.id, students.name, classes.name from students inner join classes on students.cls_id=classes.id;
+    +----+--------+-------------+
+    | id | name   | name        |
+    +----+--------+-------------+
+    |  1 | 小明   | python_01期 |
+    |  2 | 小月月 | python_02期 |
+    |  3 | 彭于晏 | python_01期 |
+    |  4 | 刘德华 | python_02期 |
+    |  5 | 黄蓉   | python_01期 |
+    |  6 | 凤姐   | python_02期 |
+    |  7 | 王祖贤 | python_01期 |
+    |  8 | 周杰伦 | python_01期 |
+    |  9 | 程坤   | python_02期 |
+    | 10 | 刘亦菲 | python_02期 |
+    | 11 | 金星   | python_03期 |
+    | 12 | 静香   | python_04期 |
+    | 13 | 郭靖   | python_04期 |
+    +----+--------+-------------+
+    - 重命名简化写法
+    mysql> select s.id, s.name, c.name from students as s inner join classes as c on s.cls_id=c.id;
+    - 按班级和id排序连续显示 
+    mysql> select c.name, s.id, s.name from students as s inner join classes as c on s.cls_id=c.id order by c.name, s.id; 
+    +-------------+----+--------+
+    | name        | id | name   |
+    +-------------+----+--------+
+    | python_01期 |  1 | 小明   |
+    | python_01期 |  3 | 彭于晏 |
+    | python_01期 |  5 | 黄蓉   |
+    | python_01期 |  7 | 王祖贤 |
+    | python_01期 |  8 | 周杰伦 |
+    | python_02期 |  2 | 小月月 |
+    | python_02期 |  4 | 刘德华 |
+    | python_02期 |  6 | 凤姐   |
+    | python_02期 |  9 | 程坤   |
+    | python_02期 | 10 | 刘亦菲 |
+    | python_03期 | 11 | 金星   |
+    | python_04期 | 12 | 静香   |
+    | python_04期 | 13 | 郭靖   |
+    +-------------+----+--------+
+
+- 例2：使用左连接查询班级表与学生表，学生表为基准，班级表没有的就是Null        
+    select s.id, s.name, c.name from students as s left join classes as c on s.cls_id=c.id;
+    +----+--------+-------------+
+    | id | name   | name        |
+    +----+--------+-------------+
+    |  1 | 小明   | python_01期 |
+    |  2 | 小月月 | python_02期 |
+    |  3 | 彭于晏 | python_01期 |
+    |  4 | 刘德华 | python_02期 |
+    |  5 | 黄蓉   | python_01期 |
+    |  6 | 凤姐   | python_02期 |
+    |  7 | 王祖贤 | python_01期 |
+    |  8 | 周杰伦 | python_01期 |
+    |  9 | 程坤   | python_02期 |
+    | 10 | 刘亦菲 | python_02期 |
+    | 11 | 金星   | python_03期 |
+    | 12 | 静香   | python_04期 |
+    | 13 | 郭靖   | python_04期 |
+    | 14 | 周杰   | NULL        |
+    +----+--------+-------------+
+- 左连接两个数据表交换一下位置，就变成了右连接
+- select s.id, s.name, c.name from classes as c left join students as s on s.cls_id=c.id; 
+   
+- 例3：使用右连接查询班级表与学生表, 班级表为基准，学生表多的学生直接删除
+    select s.id, s.name, c.name from students as s right join classes as c on s.cls_id=c.id;
+
+- 交集结果中取出特定的值使用having，推荐使用
+    select s.id, s.name, c.name from students as s left join classes as c on s.cls_id=c.id having c.name is null;
+- 原数据表中取结果使用where,但是该处的交集也可用where取出结果
+    select s.id, s.name, c.name from students as s left join classes as c on s.cls_id=c.id where c.name is null;
+    
+## 6.7. 自关联
+- 详细案例参考html文件15.8
+
+- 设计省信息的表结构provinces
+    id
+    ptitle
+- 设计市信息的表结构citys
+    id
+    ctitle
+    proid
+- citys表的proid表示城市所属的省，对应着provinces表的id值
+
+- 定义表areas，结构如下
+        id
+        atitle
+        pid
+说明:
+    因为省没有所属的省份，所以可以填写为null
+    城市所属的省份pid，填写省所对应的编号id
+    这就是自关联，表中的某一列，关联了这个表中的另外一列，但是它们的业务逻辑含义是不一样的，城市信息的pid引用的是省信息的id
+    在这个表中，结构不变，可以添加区县、乡镇街道、村社区等信息
+
+- 先创建一个表：
+    create table booktest_areainfo(
+        aid int primary key,
+        atitle varchar(20),
+        pid int
+    );
+    
+    表结构如下：
+    mysql> desc booktest_areainfo;
+    +--------+-------------+------+-----+---------+-------+
+    | Field  | Type        | Null | Key | Default | Extra |
+    +--------+-------------+------+-----+---------+-------+
+    | aid    | int(11)     | NO   | PRI | NULL    |       |
+    | atitle | varchar(20) | YES  |     | NULL    |       |
+    | pid    | int(11)     | YES  |     | NULL    |       |
+    +--------+-------------+------+-----+---------+-------+
+    
+    切换sql数据文件所在的目录下，打开CMD窗口，然后打开mysql服务,使用以上表所在的数据库
+    从sql文件中导入数据
+    source areas.sql;
+    
+    - 查询一共有多少个省
+    select count(*) from areas where pid is null;
+    select count(*) from booktest_areainfo where pid is null;
+    
+    - 例1：查询省的名称为“山西省”的所有城市
+    select city.* from areas as city
+    inner join areas as province on city.pid=province.aid
+    where province.atitle='山西省';
+    
+    - 例2：查询市的名称为“广州市”的所有区县
+    select dis.* from areas as dis
+    inner join areas as city on city.aid=dis.pid
+    where city.atitle='广州市';
+
+## 6.8. 自关联
+- 详细案例参考html文件15.9
+
+- 子查询：在一个 select 语句中,嵌入了另外一个 select 语句, 那么被嵌入的 select 语句称之为子查询语句
+
+- 子查询分类
+    标量子查询: 子查询返回的结果是一个数据(一行一列)
+    列子查询: 返回的结果是一列(一列多行)
+    行子查询: 返回的结果是一行(一行多列)
+    
+- 标量子查询
+    查询班级学生平均年龄
+    查询大于平均年龄的学生
+    查询班级学生的平均身高
+    select * from students where age > (select avg(age) from students);
+
+- 列级子查询
+    查询还有学生在班的所有班级名字
+        找出学生表中所有的班级 id
+        找出班级表中对应的名字
+    select name from classes where id in (select cls_id from students);
+
+- 行级子查询
+    需求: 查找班级年龄最大,身高最高的学生
+    行元素: 将多个字段合成一个行元素,在行级子查询中会使用到行元素
+    select * from students where (height,age) = (select max(height),max(age) from students);
+
+- 子查询中特定关键字使用
+    in 范围
+        格式: 主查询 where 条件 in (列子查询)
+        
+
+## 6.9. 查询总结，执行顺序
+- 详细案例参考html文件15.9
+
+- 查询总结
+- 查询的完整格式 ^_^ 不要被吓到 其实很简单 ! _ !
+SELECT select_expr [,select_expr,...] [      
+      FROM tb_name
+      [WHERE 条件判断]
+      [GROUP BY {col_name | postion} [ASC | DESC], ...] 
+      [HAVING WHERE 条件判断]
+      [ORDER BY {col_name|expr|postion} [ASC | DESC], ...]
+      [ LIMIT {[offset,]rowcount | row_count OFFSET offset}]
+]
+
+- 完整的select语句
+    select distinct *
+    from 表名
+    where ....
+    group by ... having ...
+    order by ...
+    limit start,count
+
+    执行顺序为：
+        from 表名
+        where ....
+        group by ...
+        select distinct *
+        having ...
+        order by ...
+        limit start,count
+    实际使用中，只是语句中某些部分的组合，而不是全部
+
+## 6.10. 数据库设计模式
+- 详细案例参考html文件14.6
+
+
+
+
+
