@@ -4,6 +4,7 @@
 - 第一部分：MySQL-基本使用
 - 第二部分：MySQL-Shell命令脚本
 - 第三部分：MySQL-数据库查询
+- 第四部分：MySQL与Python交互
 
 
 # 第一部分：MySQL-基本使用
@@ -861,6 +862,34 @@ SELECT select_expr [,select_expr,...] [
 - 详细案例参考html文件14.6
 
 
+# 第四部分：MySQL与Python交互
 
+# 7. MySQL与Python交互
 
+## 7.1 准备数据
+- 详细案例参考html文件16.1
+    -- 创建 "京东" 数据库
+    create database jing_dong charset=utf8;
+    
+    -- 使用 "京东" 数据库
+    use jing_dong;
+    
+    -- 创建一个商品goods数据表
+    create table goods(
+        id int unsigned primary key auto_increment not null,
+        name varchar(150) not null,
+        cate_name varchar(40) not null,
+        brand_name varchar(40) not null,
+        price decimal(10,3) not null default 0,
+        is_show bit not null default 1,
+        is_saleoff bit not null default 0
+    );
+    
+    查看数据库 数据表 常用命令：
+    show databases;        显示所有数据库
+    select database();     显示当前数据库信息
+    show tables;           显示所有数据表
+    desc goods;            显示当前数据表的字段信息
+    select * from goods;   显示当前数据表
+    
 
