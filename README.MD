@@ -4,7 +4,8 @@
 - 第一部分：MySQL-基本使用
 - 第二部分：MySQL-Shell命令脚本
 - 第三部分：MySQL-数据库查询
-- 第四部分：MySQL与Python交互
+- 第四部分：MySQL模拟操作京东商品数据库
+- 第五部分：MySQL与Python交互
 
 
 # 第一部分：MySQL-基本使用
@@ -241,6 +242,9 @@ curd的解释: 代表创建（Create）、更新（Update）、读取（Retrieve
     insert into 表名(列1,...) values(值1,...),(值1,...)...;
     例：
     insert into students(name) values('杨康'),('杨过'),('小龙女');
+
+- 将分组结果写入到goods_cates数据表
+    insert into goods_cates (name) select cate_name from goods group by cate_name;
 
 ### 5.3.3. 修改删除
 
@@ -862,9 +866,9 @@ SELECT select_expr [,select_expr,...] [
 - 详细案例参考html文件14.6
 
 
-# 第四部分：MySQL与Python交互
+# 第四部分：MySQL模拟操作京东商品数据库
 
-# 7. MySQL与Python交互
+# 7. MySQL模拟操作京东商品数据库
 
 ## 7.1 准备数据
 - 详细案例参考html文件16.1
@@ -892,4 +896,239 @@ SELECT select_expr [,select_expr,...] [
     desc goods;            显示当前数据表的字段信息
     select * from goods;   显示当前数据表
     
+- 查看数据库
+    mysql> select * from goods;
+    +----+---------------------------------+---------------+------------+-----------+---------+------------+
+    | id | name                            | cate_name     | brand_name | price     | is_show | is_saleoff |
+    +----+---------------------------------+---------------+------------+-----------+---------+------------+
+    |  1 | r510vc 15.6英寸笔记本           | 笔记本        | 华硕       |  3399.000 |        |            |
+    |  2 | y400n 14.0英寸笔记本电脑        | 笔记本        | 联想       |  4999.000 |        |            |
+    |  3 | g150th 15.6英寸游戏本           | 游戏本        | 雷神       |  8499.000 |        |            |
+    |  4 | x550cc 15.6英寸笔记本           | 笔记本        | 华硕       |  2799.000 |        |            |
+    |  5 | x240 超极本                     | 超级本        | 联想       |  4880.000 |        |            |
+    |  6 | u330p 13.3英寸超极本            | 超级本        | 联想       |  4299.000 |        |            |
+    |  7 | svp13226scb 触控超极本          | 超级本        | 索尼       |  7999.000 |        |            |
+    |  8 | ipad mini 7.9英寸平板电脑       | 平板电脑      | 苹果       |  1998.000 |        |            |
+    |  9 | ipad air 9.7英寸平板电脑        | 平板电脑      | 苹果       |  3388.000 |        |            |
+    | 10 | ipad mini 配备 retina 显示屏    | 平板电脑      | 苹果       |  2788.000 |        |            |
+    | 11 | ideacentre c340 20英寸一体电脑  | 台式机        | 联想       |  3499.000 |        |            |
+    | 12 | vostro 3800-r1206 台式电脑      | 台式机        | 戴尔       |  2899.000 |        |            |
+    | 13 | imac me086ch/a 21.5英寸一体电脑 | 台式机        | 苹果       |  9188.000 |        |            |
+    | 14 | at7-7414lp 台式电脑 linux ）    | 台式机        | 宏碁       |  3699.000 |        |            |
+    | 15 | z220sff f4f06pa工作站           | 服务器/工作站 | 惠普       |  4288.000 |        |            |
+    | 16 | poweredge ii服务器              | 服务器/工作站 | 戴尔       |  5388.000 |        |            |
+    | 17 | mac pro专业级台式电脑           | 服务器/工作站 | 苹果       | 28888.000 |        |            |
+    | 18 | hmz-t3w 头戴显示设备            | 笔记本配件    | 索尼       |  6999.000 |        |            |
+    | 19 | 商务双肩背包                    | 笔记本配件    | 索尼       |    99.000 |        |            |
+    | 20 | x3250 m4机架式服务器            | 服务器/工作站 | ibm        |  6888.000 |        |            |
+    | 21 | 商务双肩背包                    | 笔记本配件    | 索尼       |    99.000 |        |            |
+    +----+---------------------------------+---------------+------------+-----------+---------+------------+
+    21 rows in set (0.00 sec)
+   
+## 7.2 SQL演练
+- 详细案例参考html文件16.2
+- 所有商品的平均价格
+    mysql> select round(avg(price),2) from goods;
+    +---------------------+
+    | round(avg(price),2) |
+    +---------------------+
+    |             5570.57 |
+    +---------------------+
+    1 row in set (0.00 sec)
+    
+- 商品进行分类，显示分类后的平均价格
+    mysql>  select cate_name,round(avg(price),1) from goods group by cate_name;
+    +---------------+---------------------+
+    | cate_name     | round(avg(price),1) |
+    +---------------+---------------------+
+    | 笔记本        |              3732.3 |
+    | 游戏本        |              8499.0 |
+    | 超级本        |              5726.0 |
+    | 平板电脑      |              2724.7 |
+    | 台式机        |              4821.3 |
+    | 服务器/工作站 |             11363.0 |
+    | 笔记本配件    |              2399.0 |
+    +---------------+---------------------+
+    7 rows in set (0.00 sec)
+    
+- 查询每种类型的商品中 最贵、最便宜、平均价、数量
+    select cate_name,max(price),min(price),avg(price),count(*) from goods group by cate_name;
 
+
+- 查询所有价格大于平均价格的商品，并且按价格降序排序
+    select id,name,price from goods 
+    where price > (select round(avg(price),2) as avg_price from goods) 
+    order by price desc;
+    
+    +----+---------------------------------+-----------+
+    | id | name                            | price     |
+    +----+---------------------------------+-----------+
+    | 17 | mac pro专业级台式电脑           | 28888.000 |
+    | 13 | imac me086ch/a 21.5英寸一体电脑 |  9188.000 |
+    |  3 | g150th 15.6英寸游戏本           |  8499.000 |
+    |  7 | svp13226scb 触控超极本          |  7999.000 |
+    | 18 | hmz-t3w 头戴显示设备            |  6999.000 |
+    | 20 | x3250 m4机架式服务器            |  6888.000 |
+    +----+---------------------------------+-----------+
+    6 rows in set (0.00 sec)
+
+
+### 连接查询
+
+- 查询出每个分类中最贵商品的价格
+    mysql> select cate_name,max(price) from goods group by cate_name;
+    +---------------+------------+
+    | cate_name     | max(price) |
+    +---------------+------------+
+    | 笔记本        |   4999.000 |
+    | 游戏本        |   8499.000 |
+    | 超级本        |   7999.000 |
+    | 平板电脑      |   3388.000 |
+    | 台式机        |   9188.000 |
+    | 服务器/工作站 |  28888.000 |
+    | 笔记本配件    |   6999.000 |
+    +---------------+------------+ 
+- 上面查出了每个分类中最贵的价格，现在要查询每种类型中最贵的电脑信息 
+- 我们可以使用连接查询，可以将上面的表as作为一个表，然后和原始商品表进行连接查询
+
+
+- 使用子查询创建一个新表
+    mysql> select * from (select cate_name,max(price) as max_price from goods group by cate_name) as g_new;
+    +---------------+-----------+
+    | cate_name     | max_price |
+    +---------------+-----------+
+    | 笔记本        |  4999.000 |
+    | 游戏本        |  8499.000 |
+    | 超级本        |  7999.000 |
+    | 平板电脑      |  3388.000 |
+    | 台式机        |  9188.000 |
+    | 服务器/工作站 | 28888.000 |
+    | 笔记本配件    |  6999.000 |
+    +---------------+-----------+
+
+- 先创建一个新表，包含类别名称和最高价，并以此新表为基准，得到一个新表           
+    mysql> 
+    select * from (select cate_name,max(price) as max_price from goods group by cate_name) as g_new
+    left join goods as g
+    on g_new.cate_name=g.cate_name and g_new.max_price=g.price;
+    +---------------+-----------+------+---------------------------------+---------------+------------+-----------+---------+------------+
+    | cate_name     | max_price | id   | name                            | cate_name     | brand_name | price     | is_show | is_saleoff |
+    +---------------+-----------+------+---------------------------------+---------------+------------+-----------+---------+------------+
+    | 笔记本        |  4999.000 |    2 | y400n 14.0英寸笔记本电脑        | 笔记本        | 联想       |  4999.000 |        |            |
+    | 游戏本        |  8499.000 |    3 | g150th 15.6英寸游戏本           | 游戏本        | 雷神       |  8499.000 |        |            |
+    | 超级本        |  7999.000 |    7 | svp13226scb 触控超极本          | 超级本        | 索尼       |  7999.000 |        |            |
+    | 平板电脑      |  3388.000 |    9 | ipad air 9.7英寸平板电脑        | 平板电脑      | 苹果       |  3388.000 |        |            |
+    | 台式机        |  9188.000 |   13 | imac me086ch/a 21.5英寸一体电脑 | 台式机        | 苹果       |  9188.000 |        |            |
+    | 服务器/工作站 | 28888.000 |   17 | mac pro专业级台式电脑           | 服务器/工作站 | 苹果       | 28888.000 |        |            |
+    | 笔记本配件    |  6999.000 |   18 | hmz-t3w 头戴显示设备            | 笔记本配件    | 索尼       |  6999.000 |        |            |
+    +---------------+-----------+------+---------------------------------+---------------+------------+-----------+---------+------------+
+    7 rows in set (0.00 sec)
+    
+## 7.2.1 拆表创建表
+- 详细案例参考html文件16.2 
+
+- 将查询结果写入一个新表
+- 创建商品分类表
+    create table if not exists goods_cates(
+        id int unsigned primary key auto_increment,
+        name varchar(40) not null
+    );
+
+- 查询goods表中商品的种类
+    select cate_name from goods group by cate_name;
+
+- 将分组结果写入到goods_cates数据表
+    insert into goods_cates (name) select cate_name from goods group by cate_name;
+
+- 同步表数据
+    通过goods_cates数据表来更新goods表，将goods表类别名设置为分类表的id（cate_name外键是分类表的主键id）
+    update goods as g inner join goods_cates as c on g.cate_name=c.name set g.cate_name=c.id;
+ 
+    
+- 通过create...select来创建数据表并且同时写入记录,一步到位
+    -- select brand_name from goods group by brand_name;
+    -- 在创建数据表的时候一起插入数据
+    -- 注意: 需要对brand_name 用as起别名，否则name字段就没有值
+    create table goods_brands (
+        id int unsigned primary key auto_increment,
+        name varchar(40) not null) select brand_name as name from goods group by brand_name;
+
+- 同步数据
+    通过goods_brands数据表来更新goods数据表
+    update goods as g inner join goods_brands as b on g.brand_name=b.name set g.brand_name=b.id;
+
+- 修改表结构
+    将goods标注的分类和品牌字符类型修改和分类表和品牌表中id的数据类型一致
+    查看 goods 的数据表结构,会发现 cate_name 和 brand_name对应的类型为 varchar 但是存储的都是数字
+    通过alter table语句修改表结构
+    alter table goods  
+    change cate_name cate_id int unsigned not null,
+    change brand_name brand_id int unsigned not null;
+    
+    mysql> desc goods;
+    +------------+------------------+------+-----+---------+----------------+
+    | Field      | Type             | Null | Key | Default | Extra          |
+    +------------+------------------+------+-----+---------+----------------+
+    | id         | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+    | name       | varchar(150)     | NO   |     | NULL    |                |
+    | cate_id    | int(10) unsigned | NO   |     | NULL    |                |
+    | brand_id   | int(10) unsigned | NO   |     | NULL    |                |
+    | price      | decimal(10,3)    | NO   |     | 0.000   |                |
+    | is_show    | bit(1)           | NO   |     | b'1'    |                |
+    | is_saleoff | bit(1)           | NO   |     | b'0'    |                |
+    +------------+------------------+------+-----+---------+----------------+
+    7 rows in set (0.01 sec)
+
+
+- 第五部分：MySQL与Python交互
+## 8.1 创建连接
+- 详细案例参考html文件16.4
+
+- 引入模块
+    在py文件中引入pymysql模块
+    from pymysql import *
+
+- Connection 对象
+    用于建立与数据库的连接
+    创建对象：调用connect()方法
+    
+    conn=connect(参数列表)
+    参数host：连接的mysql主机，如果本机是'localhost'
+    参数port：连接的mysql主机的端口，默认是3306
+    参数database：数据库的名称
+    参数user：连接的用户名
+    参数password：连接的密码
+    参数charset：通信采用的编码方式，推荐使用utf8
+
+- 对象的方法
+    close()关闭连接
+    commit()提交
+    cursor()返回Cursor对象，用于执行sql语句并获得结果
+
+- Cursor对象
+    用于执行sql语句，使用频度最高的语句为select、insert、update、delete
+    获取Cursor对象：调用Connection对象的cursor()方法
+    cs1=conn.cursor()
+
+- 对象的方法
+    close()关闭
+    execute(operation [, parameters ])执行语句，返回受影响的行数，主要用于执行insert、update、delete语句，也可以执行create、alter、drop等语句
+    fetchone()执行查询语句时，获取查询结果集的第一个行数据，返回一个元组
+    fetchall()执行查询时，获取结果集的所有行，一行构成一个元组，再将这些元组装入一个元组返回
+
+- 对象的属性
+    rowcount只读属性，表示最近一次execute()执行后受影响的行数
+    connection获得当前连接对象
+
+- 参考01_MySQL案例：
+    002/003/004
+    
+
+
+## 8.1 参数化
+- 参数化
+    sql语句的参数化，可以有效防止sql注入
+    注意：此处不同于python的字符串格式化，全部使用%s占位
+    
+- 参考01_MySQL案例：
+    005/006
