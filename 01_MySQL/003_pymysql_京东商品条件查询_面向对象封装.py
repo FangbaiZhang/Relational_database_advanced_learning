@@ -27,7 +27,7 @@ class JD(object):
         # 执行sql语句的方法
         # 执行sql语句,读取出sql语句选择的table中的数据
         self.cursor.execute(sql)
-        # 取出上面已经选择的数据
+        # 取出上面已经查询到的所有数据，因为结果一个元组嵌套的元组，我们逐行打印显示出来
         for temp in self.cursor.fetchall():
             print(temp)
 

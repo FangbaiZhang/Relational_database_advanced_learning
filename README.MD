@@ -9,6 +9,24 @@
 - 第六部分: MySQL高级
 
 
+- MySQL安装参考以下博文：
+MySQL8.0.16安装---安装MySQL注意事项
+https://blog.csdn.net/u011318077/article/details/90754766
+MySQL基础知识---MySQL详细安装步骤
+https://www.cnblogs.com/ayyl/p/5978418.html
+
+- 我电脑安装时候使用的默认安装文件夹
+- 电脑中MySQL安装安装位置：
+C:\Program Files\MySQL
+
+- 用于存储数据的文件夹位于Data下面，可以打开发现每个数据库database都是一个独立的文件夹：
+C:\ProgramData\MySQL\MySQL Server 8.0\Data
+
+- MySQL图形化管理工具
+Navicat12中文版安装及破解（安装在H盘）
+https://blog.csdn.net/u011318077/article/details/90519874
+
+
 # 第一部分：MySQL-基本使用
 
 # 1. 关系型数据库核心元素
@@ -75,7 +93,7 @@
     可以通过查看帮助文档查阅所有支持的数据类型
     使用数据类型的原则是：够用就行，尽量使用取值范围小的，而不用大的，这样可以更多的节省存储空间
     常用数据类型如下：
-        整数：int，bit
+        整数：int, bit
         小数：decimal
         字符串：varchar,char
         日期时间: date, time, datetime
@@ -88,40 +106,60 @@
         对于图片、音频、视频等文件，不存储在数据库中，而是上传到某个服务器上，然后在表中存储这个文件的保存路径
     更全的数据类型可以参考[http://blog.csdn.net/anxpp/article/details/51284106]
 
-- 约束
+- mysql字段约束
+    约束	              名称
+    primary key	      主键
+    unique key	      唯一约束
+    not null	      非空约束
+    default	          默认值
+    auto_increment	  自增长约束
+    comment	          注释
+    foreign key	      外键约束
 
-    主键primary key：物理上存储的顺序
+    主键primary key：物理上存储的顺序，
+        主键约束 = 唯一性约束 + 非空约束，
+        是一张表的代表性字段，一张表只能有一个主键，
+    　　主键可以是一个字段，也可以是多个字段（联合主键，复合主键），
+        整形主键字段可以使用auto_increment（自动增长）修饰，
     非空not null：此字段不允许填写空值
-    惟一unique：此字段的值不允许重复
-    默认default：当不填写此值时会使用默认值，如果填写时以填写为准
+    唯一unique：此字段的值不允许重复
+    默认default：当不填写此值时会使用默认值，如果填写时以填写为准，（当增加数据时没有插⼊值时，会自动插⼊默认值；）
+    注释(comment)：表、列都可以设置注释(comment),注释就是对表、列的意思的进行解释
     外键foreign key：对关系字段进行约束，当为关系字段填写值时，会到关联的表中查询此值是否存在，
-    如果存在则填写成功，如果不存在则填写失败并抛出异常，
-    外键是另外一个表中的主键
-    说明：虽然外键约束可以保证数据的有效性，但是在进行数据的crud（增加、修改、删除、查询）时，
-    都会降低数据库的性能，所以不推荐使用，那么数据的有效性怎么保证呢？答：可以在逻辑层进行控制
-
+        如果存在则填写成功，如果不存在则填写失败并抛出异常，
+        外键是另外一个表中的主键
+        说明：虽然外键约束可以保证数据的有效性，但是在进行数据的crud（增加、修改、删除、查询）时，
+        都会降低数据库的性能，所以不推荐使用，那么数据的有效性怎么保证呢？答：可以在逻辑层进行控制
+        
+    补充约束：
+    unsigned 是MYSQL自定义的类型，非标准SQL。用途是起到约束数值的作用，可以增加数值范围（相当于把负数那部分加到正数上）。
+    整型的每一种都分有无符号（unsigned）和有符号（signed）两种类型（float和double总是带符号的），
+    在默认情况下声明的整型变量都是有符号的类型（char有点特别），
+    如果需声明无符号类型的话就需要在类型前加上unsigned。
+    无符号版本和有符号版本的区别就是无符号类型能保存2倍于有符号类型的正整数数据，
+    比如16位系统中一个int能存储的数据的范围为-32768~32767，而unsigned能存储的数据范围则是0~65535。
 
 # 第二部分：MySQL-Shell命令脚本
 
 # 5. MySQL数据库的命令行脚本
-- MySQL的安装：参考Python爬虫开发和项目实战pdf中的注释和QQ浏览器中数据库中的MySQL里面有安装收藏
+- MySQL的安装：参考Python爬虫开发和项目实战pdf中的注释和QQ浏览器中数据库中的MySQL里面有安装步骤收藏(详细步骤pdf已保存到本地)
 - Navicat：参考我的博客和QQ浏览器中数据库中的Navicat里面有收藏
 
 - MySQL启动方式：
-    - 方式1：打开CMD窗口执行：mysql -u root -p 然后输入MySQL的密码00----56
+    - 方式1：打开CMD窗口执行：mysql -u root -p 然后输入MySQL的密码00----56(安装过程默认用户就是root，密码是安装时候设置的)
     - 方式2：开始菜单里面有一个MySQL 8.0 Command Line Client打开即可
 
 - MySQL shell命令：
-    - SQL语句不区分大小写，语句可以多行写，最终结尾是分号‘；’
+    - SQL语句不区分大小写，语句可以多行写，最终结尾是分号;
     - 有了分号，按下enter才会执行
     
-## 5.1. 数据库操作
+## 5.1. 数据库常用操作
 - 连接数据库：
     mysql -u root -p  接着输入密码
     mysql -u root -p密码  
 - 退出数据库：
     exit\quit\ctrl+d
-- 退出当前输入状态：
+- 退出当前输入状态(有时候输入错误)：
     \c
 - 查看版本：
     select version();
@@ -143,6 +181,13 @@
     drop database 数据库名;
     例：
     drop database python;
+- 导入外部的sql数据文件
+    - 先切换到要导入数据的数据库
+    use stock_db
+    - 导入数据
+    source sql文件的路径  
+    （注意你的文件路径要是复制过来的，windows下要将"\"全部换成“/”）
+    mysql> source D:/stock_db.sql    
 
 
 ## 5.2. 数据表操作
@@ -152,23 +197,42 @@
 - 查看表结构
     desc 表名;
 - 创建表
-    auto_increment表示自动增长   
+
+    表名 字段名(数据列的名称) 定义每一个字段(该字段的各种约束)
+    注意：创建时候，表名和字段名可以使用反引号。
+          创建 MySql 的表时，表名和字段名外面的符号 ` 不是单引号，而是英文输入法状态下的反单引号，
+          也就是键盘左上角 esc 按键下面的那一个 ~ 按键。反引号是为了区分 MySql 关键字与普通字符而引入的符号，一般的，表名与字段名都使用反引号。
+    
     CREATE TABLE table_name(
-    column1 datatype contrai,
-    column2 datatype,
-    column3 datatype,
-    .....
-    columnN datatype,
-    PRIMARY KEY(one or more columns)
+        column1 datatype constraint(约束),
+        column2 datatype,
+        column3 datatype,
+        .....
+        columnN datatype,
+        PRIMARY KEY(one or more columns)
     );
     
-    例：创建班级表
+    标准写法(MySQL不区分大小写)：
+    CREATE TABLE IF NOT EXISTS runoob_tbl(
+        runoob_id INT UNSIGNED AUTO_INCREMENT,
+        runoob_title VARCHAR(100) NOT NULL,
+        runoob_author VARCHAR(40) NOT NULL,
+        submission_date DATE,
+        PRIMARY KEY (runoob_id)
+    )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    解析：
+        如果你不想字段为 NULL 可以设置字段的属性为 NOT NULL， 在操作数据库时如果输入该字段的数据为NULL ，就会报错。
+        AUTO_INCREMENT定义列为自增的属性，一般用于主键，数值会自动加1。
+        PRIMARY KEY关键字用于定义列为主键。 您可以使用多列来定义主键，列间以逗号分隔。
+        ENGINE 设置存储引擎，CHARSET 设置编码。
+    
+    实例：创建班级表
     create table classes(
-        id int unsigned auto_increment primary key not null,
+        id int unsigned auto_increment primary key not null,   # auto_increment表示自动增长  
         name varchar(10)
     );
     
-    例：创建学生表
+    实例：创建学生表
     create table students(
         id int unsigned primary key auto_increment not null,
         name varchar(20) default '',
@@ -177,30 +241,41 @@
         gender enum('男','女','人妖','保密'),
         cls_id int unsigned default 0
     )
+    
+    
 - 修改表-添加字段
     alter table 表名 add 列名 类型;
     例：
     alter table students add birthday datetime;
+    
 - 修改表-修改字段：重命名版
     alter table 表名 change 原名 新名 类型及约束;
     例：
     alter table students change birthday birth datetime not null;
-- 修改表-修改字段：不重命名版
+    
+- 修改表-修改字段：不重命名版，修改birth的类型
     alter table 表名 modify 列名 类型及约束;
     例：
     alter table students modify birth date not null;
+    
 - 修改表-删除字段(删除一列)
     alter table 表名 drop 列名;
     例：
     alter table students drop birthday;
+    
 - 删除表
     drop table 表名;
     例：
     drop table students;
+    
+    删除数据表的另外一种方法：
+    delete from students;  删除students这个数据表
+    
 - 查看表的创建语句
     show create table 表名;
     例：
     show create table classes;
+    
 -  查看表中具体内容
     select * from students;
 
@@ -225,12 +300,12 @@ curd的解释: 代表创建（Create）、更新（Update）、读取（Retrieve
 
 - 格式:INSERT [INTO] tb_name [(col_name,...)] {VALUES | VALUE} ({expr | DEFAULT},...),(...),...
 - 说明：主键列是自动增长，但是在全列插入时需要占位，通常使用0或者 default 或者 null 来占位，插入成功后以实际数据为准
-- 全列插入：值的顺序与表中字段的顺序对应
+- 全列插入：值的顺序与表中字段的顺序对应，只需要写值
     insert into 表名 values(...)
     例：
-    insert into students values(0,’郭靖‘,1,'蒙古','2016-1-2');
+    insert into students values(0,'郭靖',1,'蒙古','2016-1-2');
 
-- 部分列插入：值的顺序与给出的列顺序对应
+- 部分列插入：值的顺序与给出的列顺序对应，需要写列的名称和对应的值
     insert into 表名(列1,...) values(值1,...)
     例：
     insert into students(name,hometown,birthday) values('黄蓉','桃花岛','2016-3-2');
@@ -251,7 +326,7 @@ curd的解释: 代表创建（Create）、更新（Update）、读取（Retrieve
 
 - 修改
 - 格式: UPDATE tbname SET col1={expr1|DEFAULT} [,col2={expr2|default}]...[where 条件判断]
-    update 表名 set 列1=值1,列2=值2... where 条件
+    update 表名 set 列1=值1,列2=值2... where 条件;
     例：
     update students set gender=0,hometown='北京' where id=5;
 
@@ -262,9 +337,10 @@ curd的解释: 代表创建（Create）、更新（Update）、读取（Retrieve
     例：
     delete from students where id=5;
     
-    实际使用逻辑删除：
+    实际使用逻辑删除，只是修改了isdelete的值：
     逻辑删除，本质就是修改操作
     update students set isdelete=1 where id=1;
+    
     delete from students; 删除students这个数据表
 
 - 逻辑删除常规操作
@@ -307,7 +383,7 @@ use python_test_1;
 -- 创建students表，注意最后一行不需要逗号：
 create table students(
     id int unsigned primary key auto_increment not null, 
-    name varchar(20) default '',
+    name varchar(20) default '',  
     age tinyint unsigned default 0,
     height decimal(5,2),
     gender enum('男','女','中性','保密') default '保密',
@@ -317,12 +393,12 @@ create table students(
 
 - 前面第一个单词是字段名（每列的名称），后面的都是约束
     - 例如id行：
-    id:字段名，int:数据的类型，unsigned：无符号范围(从0开始，没有负数），
+    id:字段名，int:数据的类型，整数，unsigned：无符号范围(从0开始，没有负数，本来是负数的部分加到正数上去），
     primary key:主键，auto_increment：自动增长，not null：不能为空，
     - name varchar(20)的字符个数为20可变，default ''默认值为空
     - age tinyint极小值，unsigned无负数，范围0-255，default 0默认为0
     - height decimal(5, 2)身高的值有五位，小数点后面两位
-    - gender enum枚举，'男','女','中性','保密'可以用数字1,2,3,4替代，默认值为保密
+    - gender enum枚举，'男','女','中性','保密' 可以用数字1,2,3,4替代，默认值为保密(没有给值，就是默认值保密)
     - is_delete bit default 0, is_delete 默认值是0，bit只能存储一个比特，值只能是0或者1
 
 -- 创建classes表
@@ -365,7 +441,7 @@ insert into classes values (0, "python_01期"), (0, "python_02期");
 - 查询指定字段
     select 列1,列2,... from 表名;
     例:
-    select name from students;
+    select name,age from students;
 
 - 使用 as 给字段起别名
     select id as 序号, name as 名字, gender as 性别 from students;
@@ -415,21 +491,29 @@ insert into classes values (0, "python_01期"), (0, "python_02期");
     or
     not
     
+    select * from students where id=1 or id=3 or id=8;
+    
 - 模糊查询
     like
     %表示任意多个任意字符
     _表示一个任意字符
     
-    rlike  正则查询
+    rlike  正则查询  比如查询姓周的学生
     select name from students where name rlike "^周.*";
 
 - 范围查询
-    in表示在一个非连续的范围内
+
+    in表示在一个非连续的范围内(类似于或)
     查询编号是1或3或8的学生
     select * from students where id in(1,3,8);
+    select * from students where id=1 or id=3 or id=8;  两个结果相同
+    
     between ... and ...表示在一个连续的范围内
-    select * from students where id between 3 and 8;
+    select * from students where id between 3 and 8;   查询结果是3到8之间的学生
+    
     not in不在非连续范围内
+    select * from students where id not in (3,8,10);   除了3,8,10以外的学生
+    select * from students where id!=3 and id!=8 and id!=10; 
 
 - 空判断
     注意：null与''是不同的
@@ -449,7 +533,7 @@ select * from 表名 order by 列1 asc|desc [,列2 asc|desc,...]
 
 说明：
 将行数据按照列1进行排序，如果某些行列1的值相同时，则按照列2排序，以此类推
-默认按照列值从小到大排列（asc）
+默认按照列值从小到大排列（asc,可以不用写）
 asc从小到大排列，即升序
 desc从大到小排序，即降序
 
@@ -470,7 +554,7 @@ select * from students  order by age desc, height desc;
 为了快速得到统计数据，经常会用到如下5个聚合函数
 
 总数
-count(*)表示计算总行数，括号中写星与列名，结果是相同的
+count(*)表示计算总行数，括号中写星或列名，结果是相同的
 例1：查询学生总数
 select count(*) from students;
 
@@ -552,7 +636,7 @@ select round(avg(age), 1) from students where is_delete=0 and gender=2;
     +--------+----------------------------------------------------------+
     1 row in set (0.00 sec)
         
-    - 统计每个分组的平均年龄：
+- 统计每个分组的平均年龄：
     mysql> select gender, avg(age) from students group by gender;
     +--------+----------+
     | gender | avg(age) |
@@ -564,7 +648,7 @@ select round(avg(age), 1) from students where is_delete=0 and gender=2;
     +--------+----------+
     4 rows in set (0.00 sec)
     
-    - 分别统计性别为男/女的人的个数
+- 分别统计性别为男/女的人的个数
     select gender, count(*) from students group by gender;
 
 - group by + having
@@ -607,9 +691,11 @@ select round(avg(age), 1) from students where is_delete=0 and gender=2;
 - limit必须放在最后
 
 - 获取部分行
-    当数据量过大时，在一页中查看数据是一件非常麻烦的事情
+    当数据量过大时，在一页中查看所有的数据是一件非常麻烦的事情
+    
     语法：select * from 表名 limit count
     说明：查询到的数据，只显示前面count条数据
+    
     语法: select * from 表名 limit start,count
     说明: 显示从start开始，获取的count条数据
     
@@ -645,10 +731,11 @@ mysql支持三种类型的连接查询，分别为：
 - 右连接查询：查询的结果为两个表匹配到的数据，右表特有的数据，对于左表中不存在的数据使用null填充，右边要全显示
 - 左连接查询：查询的结果为两个表匹配到的数据，左表特有的数据，对于右表中不存在的数据使用null填充，左边要全显示
 
-- 语法
+- 语法，on后面是查询的条件
     select * from 表1 inner或left或right join 表2 on 表1.列 = 表2.列
     
 - 例1：使用内连接查询班级表与学生表
+    学生表中的cls_id即班级，根据学生表中的cls_id和班级表中的id查询数据
     select * from students inner join classes on students.cls_id = classes.id;
     mysql> select * from students inner join classes on students.cls_id=classes.id;
     +----+--------+------+--------+--------+--------+-----------+----+-------------+
@@ -668,9 +755,9 @@ mysql支持三种类型的连接查询，分别为：
     | 12 | 静香   |   12 | 180.00 | 女     |      4 |           |  4 | python_04期 |
     | 13 | 郭靖   |   12 | 170.00 | 男     |      4 |           |  4 | python_04期 |
     +----+--------+------+--------+--------+--------+-----------+----+-------------+
-
     上面取出了所有的students.cls_id=classes.id相同的列然后，进行连接
-    我们也可以只取出学生的名称和班级名称
+    
+    我们也可以只取出部分数据，比如只需要学生的名称和班级名称
     mysql> select students.id, students.name, classes.name from students inner join classes on students.cls_id=classes.id;
     +----+--------+-------------+
     | id | name   | name        |
@@ -689,8 +776,9 @@ mysql支持三种类型的连接查询，分别为：
     | 12 | 静香   | python_04期 |
     | 13 | 郭靖   | python_04期 |
     +----+--------+-------------+
-    - 重命名简化写法
+    - 重命名简化写法，将学生表重命名为s，班级表重命名为c
     mysql> select s.id, s.name, c.name from students as s inner join classes as c on s.cls_id=c.id;
+    
     - 按班级和id排序连续显示 
     mysql> select c.name, s.id, s.name from students as s inner join classes as c on s.cls_id=c.id order by c.name, s.id; 
     +-------------+----+--------+
@@ -711,7 +799,7 @@ mysql支持三种类型的连接查询，分别为：
     | python_04期 | 13 | 郭靖   |
     +-------------+----+--------+
 
-- 例2：使用左连接查询班级表与学生表，学生表为基准，班级表没有的就是Null        
+- 例2：使用左连接查询班级表与学生表，学生表为基准，班级表没有的就是Null，周杰的班级编号是5,班级表中没有5       
     select s.id, s.name, c.name from students as s left join classes as c on s.cls_id=c.id;
     +----+--------+-------------+
     | id | name   | name        |
@@ -731,15 +819,40 @@ mysql支持三种类型的连接查询，分别为：
     | 13 | 郭靖   | python_04期 |
     | 14 | 周杰   | NULL        |
     +----+--------+-------------+
-- 左连接两个数据表交换一下位置，就变成了右连接
+- 左连接两个数据表在left join左右交换一下位置，就变成了右连接
 - select s.id, s.name, c.name from classes as c left join students as s on s.cls_id=c.id; 
    
-- 例3：使用右连接查询班级表与学生表, 班级表为基准，学生表多的学生直接删除
+- 例3：使用右连接查询班级表与学生表, 以班级表为基准，学生表没有的就为空，但是该数据库，学生比班级多，因此多的学生表多的学生直接删除
     select s.id, s.name, c.name from students as s right join classes as c on s.cls_id=c.id;
+    +------+--------+-------------+
+    | id   | name   | name        |
+    +------+--------+-------------+
+    |    1 | 小明   | python_01期 |
+    |    2 | 小月月 | python_02期 |
+    |    3 | 彭于晏 | python_01期 |
+    |    4 | 刘德华 | python_02期 |
+    |    5 | 黄蓉   | python_01期 |
+    |    6 | 凤姐   | python_02期 |
+    |    7 | 王祖贤 | python_01期 |
+    |    8 | 周杰伦 | python_01期 |
+    |    9 | 程坤   | python_02期 |
+    |   10 | 刘亦菲 | python_02期 |
+    |   11 | 金星   | python_03期 |
+    |   12 | 静香   | python_04期 |
+    |   13 | 郭靖   | python_04期 |
+    +------+--------+-------------+
+
 
 - 交集结果中取出特定的值使用having，推荐使用
     select s.id, s.name, c.name from students as s left join classes as c on s.cls_id=c.id having c.name is null;
-- 原数据表中取结果使用where,但是该处的交集也可用where取出结果
+    取出班级名称为空的学生
+    +----+------+------+
+    | id | name | name |
+    +----+------+------+
+    | 14 | 周杰 | NULL |
+    +----+------+------+
+
+- 原数据表中取结果使用where,但是该处的交集也可以使用where取出结果
     select s.id, s.name, c.name from students as s left join classes as c on s.cls_id=c.id where c.name is null;
     
 ## 6.7. 自关联
@@ -1094,11 +1207,11 @@ SELECT select_expr [,select_expr,...] [
     创建对象：调用connect()方法
     
     conn=connect(参数列表)
-    参数host：连接的mysql主机，如果本机是'localhost'
-    参数port：连接的mysql主机的端口，默认是3306
+    参数host：连接的mysql主机，如果本地就使用'localhost'
+    参数port：连接的mysql主机的端口，默认(安装软件时候默认的端口)是3306
     参数database：数据库的名称
-    参数user：连接的用户名
-    参数password：连接的密码
+    参数user：数据库的用户名
+    参数password：数据库的密码
     参数charset：通信采用的编码方式，推荐使用utf8
 
 - 对象的方法
@@ -1146,7 +1259,7 @@ SELECT select_expr [,select_expr,...] [
     解决办法：定义视图
     
 - 2. 视图是什么
-    通俗的讲，视图就是一条SELECT语句执行后返回的结果集，改条查询语句的结果保存为一张表，就是视图。
+    通俗的讲，视图就是一条SELECT语句执行后返回的结果集，该条查询语句的结果保存为一张表，就是视图。
     所以我们在创建视图的时候，主要的工作就落在创建这条SQL查询语句上。
     视图是对若干张基本表的引用，一张虚表，查询语句执行的结果，
     不存储具体的数据（基本表数据发生了改变，视图也会跟着改变）；
@@ -1387,7 +1500,8 @@ mysql> select * from v_goods_info;
     select * from test_index where title='ha-99999';
     - 查看执行的时间：
     show profiles;
-    - 为表title_index的title列创建索引：
+    
+    - 为表title_index的title这一列创建索引：
     create index title_index on test_index(title(10));
     - 执行查询语句：
     select * from test_index where title='ha-99999';
@@ -1414,6 +1528,10 @@ mysql> select * from v_goods_info;
     就没有必要为一个很少使用的where字句单独建立索引了，
     对于比较小的表，排序的开销不会很大，也没有必要建立另外的索引。
     建立索引会占用磁盘空间
+    
+    表的主键就相当于主键
+    表中存在外键也相当于主键
+    因此，通过主键搜索速度最快，其它字段速度就会慢一些
 
 
 ## 9.4 账户管理
@@ -1444,7 +1562,14 @@ mysql> select * from v_goods_info;
     从服务器甚至可以通过拨号断断续续地连接主服务器。
     通过配置文件，可以指定复制所有的数据库，某个数据库，甚至是某个数据库上的某个表。
     
-- 使用主从同步的好处：
+     MongoDB副本集和MySQL主从区别：
+     - MongoDB是在同一个服务器(一台机器)，同时复制备份多个数据库
+     - MySQL复制备份数据是在多个服务器（多台机器)，复制备份多个数据库
+     - MongoDB复制备份是同步的，MySQL复制备份可以是异步的，也可以主从同步
+     - MongoDB读写在指定的某一个数据库作为主数据库
+     - MySQL一般主服务器写，从服务器读，读写分离
+    
+- 使用主从同步的好处：(读写分离，数据备份，负载均衡)
     - 通过增加从服务器来提高数据库的性能，在主服务器上执行写入和更新，在从服务器上向外提供读功能，
         可以动态地调整从服务器的数量，从而调整整个数据库的性能。
     - 提高数据安全，因为数据已复制到从服务器，从服务器可以终止复制进程，
